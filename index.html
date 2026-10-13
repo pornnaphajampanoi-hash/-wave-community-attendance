@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wave - ระบบบันทึกการเข้าร่วมประชาคม</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f0f7f4;
+    margin: 0;
+    padding: 20px;
+    color: #23483d;
+}
+
+.container {
+    max-width: 1000px;
+    margin: auto;
+}
+
+header {
+    background: #168567;
+    color: white;
+    padding: 22px;
+    border-radius: 15px;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px #0001;
+}
+
+h2 {
+    color: #168567;
+}
+
+input, select {
+    padding: 10px;
+    margin: 5px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    background: #168567;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin: 4px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #10674f;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.stat {
+    background: #e1f4eb;
+    padding: 15px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.stat strong {
+    display: block;
+    font-size: 25px;
+    margin-top: 8px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background: #168567;
+    color: white;
+}
+
+@media(max-width:600px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media print {
+    button, input, select, .no-print {
+        display: none !important;
+    }
+
+    body {
+        background: white;
+    }
+
+    .card {
+        box-shadow: none;
+    }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+<header>
+    <h1>WAVE</h1>
+    <h3>ระบบบันทึกและตรวจสอบการเข้าร่วมประชาคม</h3>
+    <p>เทศบาลตำบล</p>
+</header>
+
+<section class="card">
+    <h2>1. สร้างกิจกรรมประชาคม</h2>
+
+    <input id="eventName"
+           placeholder="ชื่อกิจกรรมประชาคม">
+
+    <input id="eventPlace"
+           placeholder="สถานที่จัดประชาคม">
+
+    <label>วันที่จัดกิจกรรม</label>
+    <input id="eventDate" type="date">
+
+    <button onclick="addEvent()">บันทึกกิจกรรม</button>
+
+    <label>เลือกกิจกรรม</label>
+    <select id="eventSelect" onchange="render()">
+        <option value="">-- เลือกกิจกรรม --</option>
+    </select>
+</section>
+
+<section class="card">
+    <h2>2. ลงทะเบียนผู้เข้าร่วมประชาคม</h2>
+
+    <input id="personName"
+           placeholder="ชื่อ-นามสกุล">
+
+    <select id="gender">
+        <option value="ชาย">ชาย</option>
+        <option value="หญิง">หญิง</option>
+        <option value="ไม่ระบุ">ไม่ระบุ</option>
+    </select>
+
+    <input id="village"
+           placeholder="หมู่บ้าน / ชุมชน">
+
+    <select id="status">
+        <option value="มาเข้าร่วม">มาเข้าร่วม</option>
+        <option value="ไม่มาเข้าร่วม">ไม่มาเข้าร่วม</option>
+    </select>
+
+    <button onclick="addPerson()">เพิ่มรายชื่อ</button>
+</section>
+
+<section class="card">
+    <h2>3. สรุปจำนวนผู้เข้าร่วม</h2>
+
+    <div class="stats">
+        <div class="stat">
+            รายชื่อทั้งหมด
+            <strong id="total">0</strong>
+        </div>
+
+        <div class="stat">
+            ชาย
+            <strong id="male">0</strong>
+        </div>
+
+        <div class="stat">
+            หญิง
+            <strong id="female">0</strong>
+        </div>
+
+        <div class="stat">
+            เข้าร่วมจริง
+            <strong id="present">0</strong>
+        </div>
+    </div>
+</section>
+
+<section class="card">
+    <h2>4. ค้นหาและตรวจสอบรายชื่อ</h2>
+
+    <input id="search"
+           placeholder="ค้นหาชื่อหรือหมู่บ้าน"
+           oninput="render()">
+
+    <select id="filterGender" onchange="render()">
+        <option value="">ทุกเพศ</option>
+        <option value="ชาย">ชาย</option>
+        <option value="หญิง">หญิง</option>
+        <option value="ไม่ระบุ">ไม่ระบุ</option>
+    </select>
+
+    <select id="filterStatus" onchange="render()">
+        <option value="">ทุกสถานะ</option>
+        <option value="มาเข้าร่วม">มาเข้าร่วม</option>
+        <option value="ไม่มาเข้าร่วม">ไม่มาเข้าร่วม</option>
+    </select>
+
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>ลำดับ</th>
+                    <th>ชื่อ-นามสกุล</th>
+                    <th>เพศ</th>
+                    <th>หมู่บ้าน</th>
+                    <th>สถานะ</th>
+                    <th class="no-print">จัดการ</th>
+                </tr>
+            </thead>
+            <tbody id="peopleTable"></tbody>
+        </table>
+    </div>
+</section>
+
+<section class="card">
+    <h2>5. รายงานและสำรองข้อมูล</h2>
+
+    <button onclick="exportCSV()">ส่งออกรายงาน CSV</button>
+
+    <button onclick="window.print()">พิมพ์รายงาน</button>
+
+    <button onclick="backup()">สำรองข้อมูล JSON</button>
+
+    <button onclick="document.getElementById('restoreFile').click()">
+        นำเข้าข้อมูลสำรอง
+    </button>
+
+    <input class="no-print" id="restoreFile"
+           type="file" accept=".json"
+           onchange="restore(event)">
+</section>
+
+</div>
+
+<script>
+let events = JSON.parse(
+    localStorage.getItem("wave_events") || "[]"
+);
+
+let people = JSON.parse(
+    localStorage.getItem("wave_people") || "[]"
+);
+
+function save() {
+    localStorage.setItem(
+        "wave_events", JSON.stringify(events)
+    );
+
+    localStorage.setItem(
+        "wave_people", JSON.stringify(people)
+    );
+}
+
+function addEvent() {
+    const name = document.getElementById("eventName").value.trim();
+    const place = document.getElementById("eventPlace").value.trim();
+    const date = document.getElementById("eventDate").value;
+
+    if (!name || !place || !date) {
+        alert("กรุณากรอกชื่อกิจกรรม สถานที่ และวันที่");
+        return;
+    }
+
+    const event = {
+        id: Date.now().toString(),
+        name,
+        place,
+        date
+    };
+
+    events.push(event);
+    save();
+
+    document.getElementById("eventName").value = "";
+    document.getElementById("eventPlace").value = "";
+    document.getElementById("eventDate").value = "";
+
+    updateEvents();
+    document.getElementById("eventSelect").value = event.id;
+    render();
+
+    alert("บันทึกกิจกรรมสำเร็จ");
+}
+
+function updateEvents() {
+    const select = document.getElementById("eventSelect");
+    const previous = select.value;
+
+    select.innerHTML =
+        '<option value="">-- เลือกกิจกรรม --</option>';
+
+    events.forEach(e => {
+        const option = document.createElement("option");
+        option.value = e.id;
+        option.textContent = e.name + " (" + e.date + ")";
+        select.appendChild(option);
+    });
+
+    if (events.some(e => e.id === previous)) {
+        select.value = previous;
+    }
+}
+
+function addPerson() {
+    const eventId = document.getElementById("eventSelect").value;
+    const name = document.getElementById("personName").value.trim();
+    const gender = document.getElementById("gender").value;
+    const village = document.getElementById("village").value.trim();
+    const status = document.getElementById("status").value;
+
+    if (!eventId) {
+        alert("กรุณาสร้างและเลือกกิจกรรมก่อน");
+        return;
+    }
+
+    if (!name) {
+        alert("กรุณากรอกชื่อ-นามสกุล");
+        return;
+    }
+
+    people.push({
+        id: Date.now().toString() + Math.random(),
+        eventId,
+        name,
+        gender,
+        village,
+        status
+    });
+
+    save();
+
+    document.getElementById("personName").value = "";
+    document.getElementById("village").value = "";
+
+    render();
+}
+
+function render() {
+    const eventId = document.getElementById("eventSelect").value;
+    const search = document.getElementById("search").value.toLowerCase();
+    const gender = document.getElementById("filterGender").value;
+    const status = document.getElementById("filterStatus").value;
+
+    const all = people.filter(p => p.eventId === eventId);
+
+    const filtered = all.filter(p =>
+        (p.name + " " + p.village).toLowerCase().includes(search) &&
+        (!gender || p.gender === gender) &&
+        (!status || p.status === status)
+    );
+
+    document.getElementById("total").textContent = all.length;
+
+    document.getElementById("male").textContent =
+        all.filter(p => p.gender === "ชาย").length;
+
+    document.getElementById("female").textContent =
+        all.filter(p => p.gender === "หญิง").length;
+
+    document.getElementById("present").textContent =
+        all.filter(p => p.status === "มาเข้าร่วม").length;
+
+    const table = document.getElementById("peopleTable");
+    table.innerHTML = "";
+
+    filtered.forEach((p, index) => {
+        const tr = document.createElement("tr");
+
+        [
+            index + 1,
+            p.name,
+            p.gender,
+            p.village || "-",
+            p.status
+        ].forEach(value => {
+            const td = document.createElement("td");
+            td.textContent = value;
+            tr.appendChild(td);
+        });
+
+        const action = document.createElement("td");
+        action.className = "no-print";
+
+        const button = document.createElement("button");
+        button.textContent = "ลบ";
+
+        button.onclick = () => {
+            if (confirm("ต้องการลบรายชื่อนี้หรือไม่?")) {
+                people = people.filter(x => x.id !== p.id);
+                save();
+                render();
+            }
+        };
+
+        action.appendChild(button);
+        tr.appendChild(action);
+        table.appendChild(tr);
+    });
+}
+
+function exportCSV() {
+    const eventId = document.getElementById("eventSelect").value;
+
+    if (!eventId) {
+        alert("กรุณาเลือกกิจกรรม");
+        return;
+    }
+
+    const event = events.find(e => e.id === eventId);
+    const list = people.filter(p => p.eventId === eventId);
+
+    const rows = [
+        ["กิจกรรม", event.name],
+        ["สถานที่", event.place],
+        ["วันที่", event.date],
+        [],
+        ["ลำดับ", "ชื่อ-นามสกุล", "เพศ", "หมู่บ้าน", "สถานะ"],
+        ...list.map((p, i) => [
+            i + 1, p.name, p.gender, p.village, p.status
+        ]),
+        [],
+        ["รายชื่อทั้งหมด", list.length],
+        ["ชาย", list.filter(p => p.gender === "ชาย").length],
+        ["หญิง", list.filter(p => p.gender === "หญิง").length],
+        ["เข้าร่วมจริง", list.filter(p => p.status === "มาเข้าร่วม").length]
+    ];
+
+    const csv = "\uFEFF" + rows.map(row =>
+        row.map(value =>
+            '"' + String(value ?? "").replace(/"/g, '""') + '"'
+        ).join(",")
+    ).join("\r\n");
+
+    const blob = new Blob([csv], {
+        type: "text/csv;charset=utf-8;"
+    });
+
+    download(blob, "รายงานประชาคม.csv");
+}
+
+function backup() {
+    const blob = new Blob(
+        [JSON.stringify({events, people}, null, 2)],
+        {type: "application/json"}
+    );
+
+    download(blob, "wave_backup.json");
+}
+
+function restore(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+        try {
+            const data = JSON.parse(reader.result);
+
+            if (!Array.isArray(data.events) ||
+                !Array.isArray(data.people)) {
+                throw new Error("ข้อมูลไม่ถูกต้อง");
+            }
+
+            if (!confirm("นำเข้าข้อมูลและแทนที่ข้อมูลเดิมทั้งหมดหรือไม่?")) {
+                return;
+            }
+
+            events = data.events;
+            people = data.people;
+
+            save();
+            updateEvents();
+            render();
+
+            alert("นำเข้าข้อมูลสำเร็จ");
+        } catch (error) {
+            alert("ไฟล์สำรองไม่ถูกต้อง");
+        } finally {
+            event.target.value = "";
+        }
+    };
+
+    reader.readAsText(file);
+}
+
+function download(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+
+    a.href = url;
+    a.download = filename;
+    a.click();
+
+    URL.revokeObjectURL(url);
+}
+
+updateEvents();
+render();
+</script>
+
+</body>
+</html>
