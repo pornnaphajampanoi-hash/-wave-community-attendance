@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAVE - ระบบบันทึกผู้เข้าร่วมประชาคม</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: Tahoma, Arial, sans-serif;
+    background: #f1f5f9;
+    color: #1e293b;
+}
+
+header {
+    background: linear-gradient(135deg, #0f766e, #14b8a6);
+    color: white;
+    padding: 25px 20px;
+}
+
+header h1 {
+    margin: 0 0 8px;
+    font-size: 28px;
+}
+
+header p {
+    margin: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 25px auto;
+    padding: 0 15px;
+}
+
+.card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 14px;
+    box-shadow: 0 3px 12px #0000000d;
+}
+
+h2 {
+    margin-top: 0;
+    color: #0f766e;
+    font-size: 21px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: white;
+    padding: 18px;
+    border-radius: 12px;
+    border-left: 5px solid #14b8a6;
+    box-shadow: 0 3px 12px #0000000d;
+}
+
+.stat p {
+    margin: 0 0 8px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.stat strong {
+    font-size: 28px;
+    color: #0f766e;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+input, select {
+    width: 100%;
+    padding: 11px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    font-size: 15px;
+    background: white;
+}
+
+input:focus, select:focus {
+    outline: 2px solid #99f6e4;
+    border-color: #0f766e;
+}
+
+button {
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    margin: 4px 2px;
+}
+
+.primary {
+    background: #0f766e;
+    color: white;
+}
+
+.secondary {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+.danger {
+    background: #fee2e2;
+    color: #b91c1c;
+}
+
+.success {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.actions {
+    margin-top: 16px;
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+th, td {
+    padding: 12px 10px;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+    font-size: 14px;
+}
+
+th {
+    background: #f0fdfa;
+    color: #115e59;
+}
+
+.badge {
+    display: inline-block;
+    border-radius: 20px;
+    padding: 5px 9px;
+    font-size: 12px;
+}
+
+.present {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.absent {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.small {
+    font-size: 12px;
+    color: #64748b;
+}
+
+footer {
+    text-align: center;
+    padding: 20px;
+    color: #64748b;
+}
+
+@media (max-width: 700px) {
+    .stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .form-grid, .filters {
+        grid-template-columns: 1fr;
+    }
+
+    header h1 {
+        font-size: 23px;
+    }
+}
+
+@media print {
+    header {
+        background: white;
+        color: black;
+        padding: 10px 0;
+    }
+
+    body {
+        background: white;
+    }
+
+    .no-print, button, input, select, footer {
+        display: none !important;
+    }
+
+    .container {
+        max-width: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .card, .stat {
+        box-shadow: none;
+        border: 1px solid #ddd;
+        break-inside: avoid;
+    }
+
+    .stats {
+        grid-template-columns: repeat(4, 1fr);
+    }
+
+    table {
+        min-width: 0;
+    }
+
+    th, td {
+        font-size: 11px;
+        padding: 6px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+    <h1>🌊 WAVE</h1>
+    <p>ระบบบันทึกและตรวจสอบจำนวนผู้เข้าร่วมประชาคม</p>
+    <p class="small" style="color:white;margin-top:8px">
+        Community Meeting Attendance System
+    </p>
+</header>
+
+<div class="container">
+
+    <section class="card">
+        <h2>📋 ข้อมูลกิจกรรมประชาคม</h2>
+
+        <div class="form-grid">
+            <div>
+                <label for="eventName">ชื่อกิจกรรม</label>
+                <input id="eventName" placeholder="เช่น ประชาคมหมู่บ้าน ประจำปี 2569">
+            </div>
+
+            <div>
+                <label for="eventPlace">สถานที่จัดกิจกรรม</label>
+                <input id="eventPlace" placeholder="ระบุสถานที่จัดประชาคม">
+            </div>
+
+            <div>
+                <label for="eventDate">วันที่จัดกิจกรรม</label>
+                <input id="eventDate" type="date">
+            </div>
+
+            <div>
+                <label for="eventTime">เวลาจัดกิจกรรม</label>
+                <input id="eventTime" type="time">
+            </div>
+        </div>
+
+        <div class="actions no-print">
+            <button class="primary" onclick="saveEvent()">บันทึกข้อมูลกิจกรรม</button>
+        </div>
+
+        <p id="eventInfo" class="small"></p>
+    </section>
+
+    <section class="stats">
+        <div class="stat">
+            <p>ผู้มีรายชื่อทั้งหมด</p>
+            <strong id="total">0</strong>
+        </div>
+
+        <div class="stat">
+            <p>ชาย</p>
+            <strong id="male">0</strong>
+        </div>
+
+        <div class="stat">
+            <p>หญิง</p>
+            <strong id="female">0</strong>
+        </div>
+
+        <div class="stat">
+            <p>เข้าร่วมจริง</p>
+            <strong id="present">0</strong>
+        </div>
+    </section>
+
+    <section class="card no-print">
+        <h2>👤 ลงทะเบียนผู้เข้าร่วมประชาคม</h2>
+
+        <form id="personForm">
+            <div class="form-grid">
+                <div>
+                    <label for="fullname">ชื่อ-นามสกุล</label>
+                    <input id="fullname" required placeholder="กรอกชื่อและนามสกุล">
+                </div>
+
+                <div>
+                    <label for="gender">เพศ</label>
+                    <select id="gender" required>
+                        <option value="">-- เลือกเพศ --</option>
+                        <option value="ชาย">ชาย</option>
+                        <option value="หญิง">หญิง</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="village">หมู่บ้าน / ชุมชน</label>
+                    <input id="village" placeholder="เช่น หมู่ 1 บ้านลาดยาว">
+                </div>
+
+                <div>
+                    <label for="attendance">สถานะการเข้าร่วม</label>
+                    <select id="attendance" required>
+                        <option value="มาเข้าร่วม">มาเข้าร่วม</option>
+                        <option value="ไม่มาเข้าร่วม">ไม่มาเข้าร่วม</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button type="submit" class="primary" id="submitBtn">
+                    + เพิ่มรายชื่อ
+                </button>
+                <button type="button" class="secondary" onclick="resetForm()">
+                    ยกเลิก
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <section class="card">
+        <h2>🔎 รายชื่อผู้เข้าร่วมประชาคม</h2>
+
+        <div class="filters no-print">
+            <input id="search" placeholder="ค้นหาชื่อหรือชุมชน..." oninput="render()">
+
+            <select id="filterGender" onchange="render()">
+                <option value="">ทุกเพศ</option>
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+            </select>
+
+            <select id="filterAttendance" onchange="render()">
+                <option value="">ทุกสถานะ</option>
+                <option value="มาเข้าร่วม">มาเข้าร่วม</option>
+                <option value="ไม่มาเข้าร่วม">ไม่มาเข้าร่วม</option>
+            </select>
+        </div>
+
+        <p id="resultCount" class="small"></p>
+
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ลำดับ</th>
+                        <th>ชื่อ-นามสกุล</th>
+                        <th>เพศ</th>
+                        <th>หมู่บ้าน / ชุมชน</th>
+                        <th>สถานะ</th>
+                        <th class="no-print">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="peopleTable"></tbody>
+            </table>
+        </div>
+
+        <div class="actions no-print">
+            <button class="success" onclick="exportCSV()">📁 ส่งออก CSV สำหรับ Excel</button>
+            <button class="secondary" onclick="window.print()">🖨️ พิมพ์รายงาน</button>
+            <button class="primary" onclick="backupData()">💾 สำรองข้อมูล JSON</button>
+
+            <button class="secondary" onclick="document.getElementById('restoreFile').click()">
+                📥 นำเข้าข้อมูลสำรอง
+            </button>
+
+            <input
+                id="restoreFile"
+                type="file"
+                accept=".json,application/json"
+                style="display:none"
+                onchange="restoreData(event)"
+            >
+
+            <button class="danger" onclick="clearAll()">ล้างข้อมูลทั้งหมด</button>
+        </div>
+    </section>
+
+</div>
+
+<footer>
+    WAVE | ระบบบันทึกและตรวจสอบจำนวนผู้เข้าร่วมประชาคม
+</footer>
+
+<script>
+const STORAGE_KEY = "wave_community_attendance_v1";
+
+let people = [];
+let eventData = {
+    name: "",
+    place: "",
+    date: "",
+    time: ""
+};
+
+let editingId = null;
+
+function loadData() {
+    try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+
+        if (raw) {
+            const data = JSON.parse(raw);
+
+            if (Array.isArray(data.people)) {
+                people = data.people;
+            }
+
+            if (data.eventData) {
+                eventData = {
+                    ...eventData,
+                    ...data.eventData
+                };
+            }
+        }
+    } catch (error) {
+        alert("ไม่สามารถอ่านข้อมูลที่บันทึกไว้ได้");
+    }
+
+    document.getElementById("eventName").value = eventData.name;
+    document.getElementById("eventPlace").value 
